@@ -1,5 +1,6 @@
 import assert from 'assert';
-import {substituteCode} from '../src/js/code-analyzer';
+import {evaluation, parseCode, substituteCode} from '../src/js/code-analyzer';
+import * as esgen from 'escodegen';
 
 describe('Parser to table cases 2', () => {
     it('fuction', () => {
@@ -222,3 +223,33 @@ describe('else without block', () => {
             '}');
     });
 });
+describe('else without block', () => {
+    it('is testing an alternate without block', () => {
+        assert.equal(esgen.generate(evaluation(parseCode(substituteCode('function foo(x, y, z){\n' +
+            '    let a = x + 1;\n' +
+            '    let b = a + y;\n' +
+            '    let c = 0;\n' +
+            '    \n' +
+            '    if (b < z) {\n' +
+            '        c = c + 5;\n' +
+            '        return x + y + z + c;\n' +
+            '    } else if (b < z * 2) {\n' +
+            '        c = c + x + 5;\n' +
+            '        return x + y + z + c;\n' +
+            '    } else {\n' +
+            '        c = c + z + 5;\n' +
+            '        return x + y + z + c;\n' +
+            '    }\n' +
+            '}\n')),{x:1,y:2,z:4}),{verbatim: 'color'}),'function foo(x, y, z) {\n' +
+            '    if (<mark style="background-color: orangered">x + 1 + y < z</mark>) {\n' +
+            '        return x + y + z + (0 + 5);\n' +
+            '    } else if (<mark style="background-color: forestgreen">x + 1 + y < z * 2</mark>) {\n' +
+            '        return x + y + z + (0 + x + 5);\n' +
+            '    } else {\n' +
+            '        return x + y + z + (0 + z + 5);\n' +
+            '    }\n' +
+            '}');
+    });
+});
+
+
