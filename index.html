@@ -19,6 +19,7 @@
                 height: 95%;
             }
         </style>
+
     </head>
     <body>
         <table>
@@ -30,26 +31,48 @@
                 </td>
                 <td>
                     <div>
-                        <label>Parsed code here</label>
+                        <label>insert input vector</label>
                     </div>
                 </td>
+
             </tr>
             <tr>
                 <td>
                     <div class="textAreaWrapper">
-                        <textarea id="codePlaceholder" title="Enter code here"></textarea>
+                        <textarea id="codePlaceholder" title="Enter code here"> </textarea>
+
                     </div>
                 </td>
                 <td>
+                    <div >
+                        <textarea id="input" title="input vector" rows="5" cols="50">
+                            {"arg_1":value_1,"arg_2":value_2,"arg_3":value_3...."arg_n":value_n}
+                        </textarea>
+                    </div>
                     <div class="textAreaWrapper">
                         <textarea id="parsedCode" title="Parse code"></textarea>
+                    </div>
+                </td>
+                <td>
+                    <div id ="colorEval">
+
                     </div>
                 </td>
             </tr>
             <tr>
                 <td>
                     <div>
-                        <button id="codeSubmissionButton">Parse code</button>
+                        <button id="codeSubmissionButton">Substitution</button>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <button id="evaluateButton" >Evaluate</button>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <button id="parse" >parser</button>
                     </div>
                 </td>
                 <td>
