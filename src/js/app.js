@@ -22,6 +22,3 @@ $(document).ready(function () {
     });
 });
 
-
-
-//var json = JSON.stringify(parsedCode);
