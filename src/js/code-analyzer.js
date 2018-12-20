@@ -57,22 +57,24 @@ function subIf(node) {
     ifbool = true; let init; mapLocalIf = copy();
     init = node.test.valuetext;
     init = replaceValue(init);
-    if (node.consequent.type == 'BlockStatement') {
-        result.push('if(' + init + '){');
-    } else
-        result.push('if(' + init + ')');
+    result.push(node.consequent.type == 'BlockStatement'?'if(' + init + '){':'if(' + init + ')');
     symbolicsSubt[node.consequent.type](node.consequent);
     if (node.alternate != null) {
-        if (node.alternate.type == 'IfStatement') {
-            subIfElse(node.alternate);
-        } else {mapLocalIf = copy();
-            result.push('else{');
-            symbolicsSubt[node.alternate.type](node.alternate);
-        }
-    }
-    ifbool = false;
+        checkType(node);
+    }ifbool = false;
 }
-
+function checkType(node){
+    if (node.alternate.type == 'IfStatement') {
+        subIfElse(node.alternate);
+    } else {mapLocalIf = copy();
+        if(node.alternate.type==='BlockStatement')
+            result.push('else{');
+        else if(!(node.alternate.type=='ExpressionStatement'&&(!mapGlobal.includes(node.alternate.expression.left.name)))){
+            result.push('else');
+        }
+        symbolicsSubt[node.alternate.type](node.alternate);
+    }
+}
 
 function subIfElse(node) {
     ifbool = true;  mapLocalIf = copy();  let init;
@@ -80,17 +82,11 @@ function subIfElse(node) {
     init = replaceValue(init);
     if (node.consequent.type == 'BlockStatement') {
         result.push('else if(' + init + '){');
-    } else
-        result.push('else if(' + init + ')');
+    } else result.push('else if(' + init + ')');
     symbolicsSubt[node.consequent.type](node.consequent);
     if (node.alternate != null) {
-        if (node.alternate.type == 'IfStatement') {
-            subIfElse(node.alternate);
-        } else {
-            mapLocalIf = copy();
-            result.push('else{');
-            symbolicsSubt[node.alternate.type](node.alternate);
-        }
+        checkType(node);
+
     }
     ifbool = false;
 }
@@ -103,9 +99,9 @@ function subWhile(node) {
     init = replaceValue(init);
     if (node.body.type == 'BlockStatement') {
         result.push('while(' + init + '){');
-    } else
+    }else if(!(node.body.type=='ExpressionStatement'&&(!mapGlobal.includes(node.body.expression.left.name)))){
         result.push('while(' + init + ')');
-
+    }
     symbolicsSubt[node.body.type](node.body);
     ifbool = false;
 
@@ -118,10 +114,13 @@ function subVar(node) {
         if (node.declarations[i].init != null) {
             init = node.declarations[i].init.valuetext;
             init = replaceValue(init);
-            if (/*!(node.declarations[i].id.name in mapLocal) &&*/ funcbool) {
+
+            if (funcbool) {
+
                 mapLocal[node.declarations[i].id.name] = init;
             }
             else result.push(node.valuetext);
+
 
         }
     }
@@ -144,12 +143,6 @@ function replaceValue(node) {
 }
 
 function tryEval(node) {
-    // try {
-    //     // let nodeNew = eval(node);
-    //     // return node!=undefined?nodeNew:node;
-    // }
-    // catch (e) {
-    // }
     return node;
 }
 
@@ -161,6 +154,7 @@ function subBlockState(node) {
 }
 
 function subFunc(node) {
+
     result.push((node.valuetext).substring(0, node.valuetext.indexOf('{') + 1));
     funcbool = true;
     node.params.map((part) => mapGlobal.push(part.name));
@@ -206,30 +200,21 @@ const symbolicsSubt = {
     'ReturnStatement': subRet,
 
 };
-//.....................................EVALUATE................................................//
-
 const evaluation=(tree, input)=>{
     estr.replace(tree, {enter: function (node) {
-        //  console.log(node.type);
         if(node.type==='IfStatement'){
             return evalIf(node, input);
         }
-        else return tree;
-
     }
     });
     return tree;
 };
 function evalIf(node, input){
-    //node.test['x-verbatim-property'] =
     if(( color(node.test,input))===true){
-        // node.test.color=
-        //console.log('true');
         node.test.color = '<mark style="background-color: forestgreen">' +
          node.test.valuetext + '</mark>';
     }
     else {
-        //console.log('false');
         node.test.color = '<mark style="background-color: orangered">' +
          node.test.valuetext + '</mark>';
     }
